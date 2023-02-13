@@ -1,8 +1,8 @@
 const reverse = (string) => {
   return string
-  .split('')
-  .reverse()
-  .join('')
+    .split('')
+    .reverse()
+    .join('')
 }
 
 const average = (array) => {
@@ -13,6 +13,6 @@ const average = (array) => {
 }
 
 module.exports = {
-  reverse, 
+  reverse,
   average,
 }

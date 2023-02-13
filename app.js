@@ -13,12 +13,12 @@ app.use('/api/blogs', blogsRouter)
 app.use(cors())
 
 mongoose.connect(config.MONGODB_URI)
-.then(() => {
-  logger.info('connected to MongoDB')
-})
-.catch((error) => {
-  logger.error('error connecting to MongoDB', error.message)
-}) 
+  .then(() => {
+    logger.info('connected to MongoDB')
+  })
+  .catch((error) => {
+    logger.error('error connecting to MongoDB', error.message)
+  })
 
 
 module.exports = app
