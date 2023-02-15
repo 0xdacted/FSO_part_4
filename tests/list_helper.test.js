@@ -21,7 +21,7 @@ describe('database return values', () => {
       .expect(200)
       .expect('Content-Type', /application\/json/)
   }, 100000)
-  
+
   test('all blogs are returned', async () => {
     const response = await api.get('/api/blogs')
     expect(response.body).toHaveLength(helper.initialBlogs.length)
@@ -30,7 +30,7 @@ describe('database return values', () => {
 
 
 describe('total likes', () => {
-  
+
   test('when list has only one blog, equals the likes of that', () => {
     const result = helper.totalLikes(helper.listWithOneBlog)
     expect(result).toBe(5)
