@@ -1,16 +1,44 @@
-const listHelper = require('../utils/list_helper')
+const helper = require('../utils/list_helper')
+const supertest = require('supertest')
+const app = require('../app')
+const api = supertest(app)
+const Blog = require('../models/blog')
+const mongoose = require('mongoose')
+
+beforeEach(async () => {
+  await Blog.deleteMany({})
+
+  for (let blog of helper.initialBlogs) {
+    let blogObject = new Blog(blog)
+    await blogObject.save()
+  }
+})
+
+describe('database return values', () => {
+  test('blogs are returned as json', async () => {
+    await api 
+      .get('/api/blogs')
+      .expect(200)
+      .expect('Content-Type', /application\/json/)
+  }, 100000)
+  
+  test('all blogs are returned', async () => {
+    const response = await api.get('/api/blogs')
+    expect(response.body).toHaveLength(helper.initialBlogs.length)
+  })
+})
 
 
 describe('total likes', () => {
   
   test('when list has only one blog, equals the likes of that', () => {
-    const result = listHelper.totalLikes(listHelper.listWithOneBlog)
+    const result = helper.totalLikes(helper.listWithOneBlog)
     expect(result).toBe(5)
   })
 
 
   test('when list has multiple blogs, equals the likes of all blogs', () => {
-    const result = listHelper.totalLikes(listHelper.initialBlogs)
+    const result = helper.totalLikes(helper.initialBlogs)
     expect(result).toBe(36)
 
   })
@@ -18,7 +46,7 @@ describe('total likes', () => {
 
 describe('favorite blog', () => {
   test('when list only has one blog, equals that blog', () => {
-    const result = listHelper.favoriteBlog(listHelper.listWithOneBlog)
+    const result = helper.favoriteBlog(helper.listWithOneBlog)
     expect(result).toEqual({
       _id: '5a422aa71b54a676234d17f8',
       title: 'Go To Statement Considered Harmful',
@@ -31,12 +59,12 @@ describe('favorite blog', () => {
 
   test('when list has no blogs, equals null', () => {
 
-    const result = listHelper.favoriteBlog(listHelper.emptyList)
+    const result = helper.favoriteBlog(helper.emptyList)
     expect(result).toBe(null)
   })
 
   test('when list has multiple blogs, equals blog with highest likes', () => {
-    const result = listHelper.favoriteBlog(listHelper.initialBlogs)
+    const result = helper.favoriteBlog(helper.initialBlogs)
     expect(result).toEqual({
       _id: "5a422b3a1b54a676234d17f9",
       title: "Canonical string reduction",
@@ -50,7 +78,7 @@ describe('favorite blog', () => {
 
 describe('most blogs', () => {
   test('when list only has one blog, equals that author', () => {
-    const result = listHelper.mostBlogs(listHelper.listWithOneBlog)
+    const result = helper.mostBlogs(helper.listWithOneBlog)
     expect(result).toEqual({
       author: 'Edsger W. Dijkstra',
       blogs: 1
@@ -59,12 +87,12 @@ describe('most blogs', () => {
 
   test('when list has no blogs, equals null', () => {
 
-    const result = listHelper.mostBlogs(listHelper.emptyList)
+    const result = helper.mostBlogs(helper.emptyList)
     expect(result).toBe(null)
   })
 
   test('when list has multiple blogs, equals author with most blogs', () => {
-    const result = listHelper.mostBlogs(listHelper.initialBlogs)
+    const result = helper.mostBlogs(helper.initialBlogs)
     expect(result).toEqual({
       author: 'Robert C. Martin',
       blogs: 3
@@ -75,7 +103,7 @@ describe('most blogs', () => {
 
 describe('most likes', () => {
   test('when list only has one blog, equals that author', () => {
-    const result = listHelper.mostLikes(listHelper.listWithOneBlog)
+    const result = helper.mostLikes(helper.listWithOneBlog)
     expect(result).toEqual({
       author: 'Edsger W. Dijkstra',
       likes: 5
@@ -84,12 +112,12 @@ describe('most likes', () => {
 
   test('when list has no blogs, equals null', () => {
 
-    const result = listHelper.mostLikes(listHelper.emptyList)
+    const result = helper.mostLikes(helper.emptyList)
     expect(result).toBe(null)
   })
 
   test('when list has multiple blogs, equals blog with highest likes', () => {
-    const result = listHelper.mostLikes(listHelper.initialBlogs)
+    const result = helper.mostLikes(helper.initialBlogs)
     expect(result).toEqual({
       author: 'Edsger W. Dijkstra',
       likes: 17
@@ -97,3 +125,7 @@ describe('most likes', () => {
   })
 },
 )
+
+afterAll(async () => {
+  await mongoose.connection.close
+})
