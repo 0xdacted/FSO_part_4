@@ -65,6 +65,21 @@ describe('creating a new blog post', () => {
     expect(finalBlogs).toHaveLength(helper.initialBlogs.length + 1)
 
   })
+  test('default value for likes is 0', async () => {
+    const newBlog = {
+      title: 'Test blog',
+      author: 'Test author',
+      url: 'http://www.testblog.com'
+    }
+  
+    const response = await api
+      .post('/api/blogs')
+      .send(newBlog)
+      .expect(201)
+      .expect('Content-Type', /application\/json/)
+  
+    expect(response.body.likes).toBe(0)
+  })
 })
 
 
