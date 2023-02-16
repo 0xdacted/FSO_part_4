@@ -80,6 +80,28 @@ describe('creating a new blog post', () => {
   
     expect(response.body.likes).toBe(0)
   })
+  test('fails with status code 400 if title is missing', async () => {
+    const newBlog = {
+      author: 'Test Author',
+      url: 'http://testblog.com',
+      likes: 0
+    }
+    await api
+      .post('/api/blogs')
+      .send(newBlog)
+      .expect(400)
+  })
+  test('fails with status code 400 if url is missing', async () => {
+    const newBlog = {
+      title: 'Test Blog',
+      author: 'Test Author',
+      likes: 0
+    }
+    await api
+      .post('/api/blogs')
+      .send(newBlog)
+      .expect(400)
+  })
 })
 
 
