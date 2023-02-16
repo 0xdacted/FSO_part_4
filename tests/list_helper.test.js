@@ -38,7 +38,7 @@ describe('database return values', () => {
 describe('creating a new blog post', () => {
   beforeEach(async () => {
     await Blog.deleteMany({})
-  
+
     for (let blog of helper.initialBlogs) {
       let blogObject = new Blog(blog)
       await blogObject.save()
@@ -51,13 +51,13 @@ describe('creating a new blog post', () => {
       url: 'http://testblog.com',
       likes: 10
     }
-    
+
     const response = await api
       .post('/api/blogs')
       .send(newBlog)
       .expect(201)
       .expect('Content-Type', /application\/json/)
-    
+
     const savedBlog = await Blog.findById(response.body.id)
     expect(savedBlog).toMatchObject(newBlog)
 
@@ -71,13 +71,13 @@ describe('creating a new blog post', () => {
       author: 'Test author',
       url: 'http://www.testblog.com'
     }
-  
+
     const response = await api
       .post('/api/blogs')
       .send(newBlog)
       .expect(201)
       .expect('Content-Type', /application\/json/)
-  
+
     expect(response.body.likes).toBe(0)
   })
   test('fails with status code 400 if title is missing', async () => {
@@ -201,6 +201,28 @@ describe('most likes', () => {
   })
 },
 )
+
+describe('delete blog post routing', () => {
+  test('deletes a single blog post', async () => {
+    const newBlog = new Blog({
+      title: 'Test Blog',
+      author: 'Test Author',
+      url: 'http://test.com',
+      likes: 5,
+    })
+    await newBlog.save()
+    await api.delete(`/api/blogs/${newBlog.id}`).expect(204)
+    const blogsInDb = await Blog.find({})
+    expect(blogsInDb).toHaveLength(helper.initialBlogs.length)
+  })
+
+  test('returns a 404 error if blog post not found', async () => {
+    const invalidId = '123445787281'
+    await api.delete(`/api/blogs${invalidId}`).expect(404)
+  })
+})
+
+
 
 afterAll(async () => {
   await mongoose.connection.close
