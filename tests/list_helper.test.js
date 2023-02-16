@@ -26,6 +26,14 @@ describe('database return values', () => {
     const response = await api.get('/api/blogs')
     expect(response.body).toHaveLength(helper.initialBlogs.length)
   })
+
+  test('blogs should have a string "id" property as their unique identifier', async () => {
+    const post = await new Blog({
+      title: 'To be Deleted'
+    })
+    expect(post.id).toBeDefined()
+    expect(typeof post.id).toBe('string')
+  })
 })
 
 
