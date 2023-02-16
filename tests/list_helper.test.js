@@ -6,6 +6,14 @@ const Blog = require('../models/blog')
 const mongoose = require('mongoose')
 
 describe('database return values', () => {
+  beforeEach(async () => {
+    await Blog.deleteMany({})
+
+    for (let blog of helper.initialBlogs) {
+      let blogObject = new Blog(blog)
+      await blogObject.save()
+    }
+  })
   test('blogs are returned as json', async () => {
     await api 
       .get('/api/blogs')
@@ -41,7 +49,7 @@ describe('creating a new blog post', () => {
       title: 'Test Blog Post',
       author: 'John Doe',
       url: 'http://testblog.com',
-      likes: '10'
+      likes: 10
     }
     
     const response = await api
