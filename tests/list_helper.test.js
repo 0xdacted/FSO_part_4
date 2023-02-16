@@ -4,7 +4,6 @@ const app = require('../app')
 const api = supertest(app)
 const Blog = require('../models/blog')
 const mongoose = require('mongoose')
-const { update } = require('../models/blog')
 
 describe('database return values', () => {
   beforeEach(async () => {
@@ -238,7 +237,7 @@ describe('update blog post routing', () => {
       .put(`/api/blogs/${newBlog.id}`)
       .send(updatedBlog)
       .expect(200)
-    
+
     expect(response.body.likes).toBe(10)
   })
 
