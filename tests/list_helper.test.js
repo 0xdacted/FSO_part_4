@@ -5,15 +5,6 @@ const api = supertest(app)
 const Blog = require('../models/blog')
 const mongoose = require('mongoose')
 
-beforeEach(async () => {
-  await Blog.deleteMany({})
-
-  for (let blog of helper.initialBlogs) {
-    let blogObject = new Blog(blog)
-    await blogObject.save()
-  }
-})
-
 describe('database return values', () => {
   test('blogs are returned as json', async () => {
     await api 
@@ -33,6 +24,38 @@ describe('database return values', () => {
     })
     expect(post.id).toBeDefined()
     expect(typeof post.id).toBe('string')
+  })
+})
+
+describe('creating a new blog post', () => {
+  beforeEach(async () => {
+    await Blog.deleteMany({})
+  
+    for (let blog of helper.initialBlogs) {
+      let blogObject = new Blog(blog)
+      await blogObject.save()
+    }
+  })
+  test('succeeds with valid data', async () => {
+    const newBlog = {
+      title: 'Test Blog Post',
+      author: 'John Doe',
+      url: 'http://testblog.com',
+      likes: '10'
+    }
+    
+    const response = await api
+      .post('/api/blogs')
+      .send(newBlog)
+      .expect(201)
+      .expect('Content-Type', /application\/json/)
+    
+    const savedBlog = await Blog.findById(response.body.id)
+    expect(savedBlog).toMatchObject(newBlog)
+
+    const finalBlogs = await Blog.find({})
+    expect(finalBlogs).toHaveLength(helper.initialBlogs.length + 1)
+
   })
 })
 
