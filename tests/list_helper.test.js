@@ -4,6 +4,7 @@ const app = require('../app')
 const api = supertest(app)
 const Blog = require('../models/blog')
 const mongoose = require('mongoose')
+const { update } = require('../models/blog')
 
 describe('database return values', () => {
   beforeEach(async () => {
@@ -219,6 +220,36 @@ describe('delete blog post routing', () => {
   test('returns a 404 error if blog post not found', async () => {
     const invalidId = '123445787281'
     await api.delete(`/api/blogs${invalidId}`).expect(404)
+  })
+})
+
+describe('update blog post routing', () => {
+  test('updates the number of likes for a blog post', async () => {
+    const newBlog = new Blog({
+      title: 'Test Blog',
+      author: 'Test Author',
+      url: 'http://test.com',
+      likes: 5,
+    })
+    await newBlog.save()
+
+    const updatedBlog = { likes: 10 }
+    const response = await api
+      .put(`/api/blogs/${newBlog.id}`)
+      .send(updatedBlog)
+      .expect(200)
+    
+    expect(response.body.likes).toBe(10)
+  })
+
+  test('returns a 404 error if blog post not found', async () => {
+    const invalidId = '123448784833'
+    const updatedBlog = { likes: 10 }
+
+    await api
+      .put(`/api/blogs/${invalidId}`)
+      .send(updatedBlog)
+      .expect(404)
   })
 })
 
