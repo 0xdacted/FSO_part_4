@@ -16,7 +16,7 @@ blogsRouter.get('/', async (request, response) => {
   }
 })
 
-blogsRouter.post('/', middleware.tokenExtractor, async (request, response) => {
+blogsRouter.post('/', async (request, response) => {
   try {
     const body = request.body
     if (!body.title || !body.url) {
@@ -28,9 +28,6 @@ blogsRouter.post('/', middleware.tokenExtractor, async (request, response) => {
     }
     const user = await User.findById(decodedToken)
 
-    const users = await User.find({})
-    const randomUser = users[Math.floor(Math.random() * users.length)]
-
     const blog = new Blog({
       title: body.title,
       author: body.author,
@@ -39,8 +36,8 @@ blogsRouter.post('/', middleware.tokenExtractor, async (request, response) => {
       user: user._id
     })
     const result = await blog.save()
-    randomUser.blogs = randomUser.blogs.concat(blog._id)
-    await randomUser.save()
+    user.blogs = user.blogs.concat(blog._id)
+    await user.save()
     response.status(201).json(result)
   }
   catch (error) {
