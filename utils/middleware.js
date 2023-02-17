@@ -5,6 +5,7 @@ const tokenExtractor = (request, response, next) => {
     request.token = authorization.replace('Bearer ', '')
   }
   request.token = null
+  next()
 }
 
 module.exports = { tokenExtractor }
