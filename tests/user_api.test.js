@@ -19,6 +19,15 @@ describe('AddUser', () => {
     expect(response.body.username).toBe(user.username)
   })
 
+  test('does not create a new user with invalid input', async () => {
+    const user = {
+      username: 'te',
+      password: 'pa',
+      name: 'Test User'
+    }
+    const response = await api.post('/api/users').send(user).expect(400)
+    expect(response.body.error).toBeDefined()
+  })
 })
 
 
