@@ -22,18 +22,14 @@ blogsRouter.post('/', async (request, response) => {
     if (!body.title || !body.url) {
       return response.status(400).json({ error: 'Title and url are required' })
     }
-    const decodedToken = jwt.verify(request.token, process.env.SECRET)
-    if (!decodedToken.id) {
-      return response.status(401).json({ error: 'token invalid' })
-    }
-    const user = await User.findById(decodedToken)
+    const user = request.user
 
     const blog = new Blog({
       title: body.title,
       author: body.author,
       url: body.url,
       likes: body.likes || 0,
-      user: user._id
+      user: user.id
     })
     const result = await blog.save()
     user.blogs = user.blogs.concat(blog._id)
@@ -56,7 +52,7 @@ blogsRouter.delete('/:id', async (request, response) => {
     if (!blog) {
       return response.status(404).json({ error: 'Blog not found '})
     }
-    if (blog.user.toString() !== decodedToken.id.toString()) {
+    if (request.user.toString() !== request.user._id.toString()) {
       return response.status(401).json({ error: 'unauthorized' })
     }
     await blog.remove()
@@ -80,7 +76,7 @@ blogsRouter.put('/:id', async (request, response) => {
     if (!blog) {
       return response.status(404).json({ error: 'Blog not found' })
     }
-    if (blog.user.toString() !== decodedToken.id.toString()) {
+    if (request.user.toString() !== request.user._id.toString()) {
       return response.status(401).json({ error: 'unauthorized' })
     }
     response.json(blog)
