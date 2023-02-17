@@ -1,5 +1,6 @@
 const blogsRouter = require('express').Router()
 const Blog = require('../models/blog')
+const User = require('../models/user')
 
 blogsRouter.get('/', async (request, response) => {
   try {
@@ -18,11 +19,16 @@ blogsRouter.post('/', async (request, response) => {
     if (!body.title || !body.url) {
       return response.status(400).json({ error: 'Title and url are required' })
     }
+
+    const users = await User.find({})
+
+    const randomUser = users[Math.floor(Math.random() * users.length)]
     const blog = new Blog({
       title: body.title,
       author: body.author,
       url: body.url,
-      likes: body.likes || 0
+      likes: body.likes || 0,
+      user: randomUser._id
     })
     const result = await blog.save()
     response.status(201).json(result)
