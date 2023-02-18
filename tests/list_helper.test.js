@@ -102,6 +102,7 @@ describe('creating a new blog post', () => {
 
     const response = await api
       .post('/api/blogs')
+      .set('Authorization', `Bearer ${token}`)
       .send(newBlog)
       .expect(201)
       .expect('Content-Type', /application\/json/)
@@ -230,16 +231,46 @@ describe('most likes', () => {
 },
 )
 
-describe('delete blog post routing', () => {
+describe('delete blog post routing',  () => {
+  let user, token
+
+  beforeEach(async () => {
+    const existingUser = {
+      username: 'testuser',
+      password: 'password123',
+      name: 'Test User',
+    }
+    await api.post('/api/users').send(existingUser)
+
+    const loginResponse = await api
+      .post('/api/login')
+      .send({
+        username: existingUser.username,
+        password: existingUser.password
+      })
+
+    user = await User.findOne({ username: existingUser.username })
+
+    token = loginResponse.body.token
+    console.log(user, token)
+  })
+
   test('deletes a single blog post', async () => {
     const newBlog = new Blog({
       title: 'Test Blog',
       author: 'Test Author',
       url: 'http://test.com',
       likes: 5,
+      user: user._id
     })
+
     await newBlog.save()
-    await api.delete(`/api/blogs/${newBlog.id}`).expect(204)
+
+    await api
+      .delete(`/api/blogs/${newBlog.id}`)
+      .set('Authorization', `Bearer ${token}`)
+      .expect(204)
+
     const blogsInDb = await Blog.find({})
     expect(blogsInDb).toHaveLength(helper.initialBlogs.length)
   })
