@@ -4,9 +4,7 @@ const app = require('../app')
 const api = supertest(app)
 const Blog = require('../models/blog')
 const mongoose = require('mongoose')
-const logger = require('../utils/logger')
 const User = require('../models/user')
-const jwt = require('jsonwebtoken')
 
 describe('database return values', () => {
   beforeEach(async () => {
@@ -18,7 +16,7 @@ describe('database return values', () => {
     }
   })
   test('blogs are returned as json', async () => {
-    await api 
+    await api
       .get('/api/blogs')
       .expect(200)
       .expect('Content-Type', /application\/json/)
@@ -131,7 +129,23 @@ describe('creating a new blog post', () => {
       .send(newBlog)
       .expect(400)
   })
+  test('Adding a new blog without a token should return 401 Unauthorized', async () => {
+    const newBlog = {
+      title: 'Test Blog',
+      author: 'Test Author',
+      url: 'https://www.example.com/test-blog',
+      likes: 0
+    }
+
+    const response = await api
+      .post('/api/blogs')
+      .send(newBlog)
+      .expect(401)
+
+    expect(response.body.error).toContain('token is invalid')
+  })
 })
+
 
 
 describe('total likes', () => {
