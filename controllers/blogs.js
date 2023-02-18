@@ -18,12 +18,12 @@ blogsRouter.get('/', async (request, response) => {
 
 blogsRouter.post('/', async (request, response) => {
   try {
+    console.log(request.user)
     const body = request.body
     if (!body.title || !body.url) {
       return response.status(400).json({ error: 'Title and url are required' })
     }
     const user = request.user
-
     const blog = new Blog({
       title: body.title,
       author: body.author,
@@ -32,9 +32,10 @@ blogsRouter.post('/', async (request, response) => {
       user: user.id
     })
     const result = await blog.save()
+    const returnedObject = result.toJSON()
     user.blogs = user.blogs.concat(blog._id)
     await user.save()
-    response.status(201).json(result)
+    response.status(201).json(returnedObject)
   }
   catch (error) {
     response.status(400).json({ error: error.message })

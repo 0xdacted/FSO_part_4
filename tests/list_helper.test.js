@@ -4,6 +4,9 @@ const app = require('../app')
 const api = supertest(app)
 const Blog = require('../models/blog')
 const mongoose = require('mongoose')
+const logger = require('../utils/logger')
+const User = require('../models/user')
+const jwt = require('jsonwebtoken')
 
 describe('database return values', () => {
   beforeEach(async () => {
@@ -45,18 +48,41 @@ describe('creating a new blog post', () => {
     }
   })
   test('succeeds with valid data', async () => {
+    const existingUser = {
+      username: 'testuser',
+      password: 'password123',
+      name: 'Test User',
+    }
+    await api.post('/api/users').send(existingUser)
+
+    const loginResponse = await api
+      .post('/api/login')
+      .send({
+        username: existingUser.username,
+        password: existingUser.password
+    })
+
+
+    const user = await User.findOne({ username: existingUser.username })
+
     const newBlog = {
       title: 'Test Blog Post',
       author: 'John Doe',
       url: 'http://testblog.com',
-      likes: 10
+      likes: 10,
+      user: user._id
     }
+
+  
+    const token = loginResponse.body.token
 
     const response = await api
       .post('/api/blogs')
+      .set('Authorization', `Bearer ${token}`)
       .send(newBlog)
       .expect(201)
       .expect('Content-Type', /application\/json/)
+
 
     const savedBlog = await Blog.findById(response.body.id)
     expect(savedBlog).toMatchObject(newBlog)
