@@ -39,15 +39,11 @@ describe('database return values', () => {
 })
 
 describe('creating a new blog post', () => {
+  let user
+  let token
   beforeEach(async () => {
     await Blog.deleteMany({})
 
-    for (let blog of helper.initialBlogs) {
-      let blogObject = new Blog(blog)
-      await blogObject.save()
-    }
-  })
-  test('succeeds with valid data', async () => {
     const existingUser = {
       username: 'testuser',
       password: 'password123',
@@ -60,10 +56,19 @@ describe('creating a new blog post', () => {
       .send({
         username: existingUser.username,
         password: existingUser.password
-    })
+      })
 
+    user = await User.findOne({ username: existingUser.username })
 
-    const user = await User.findOne({ username: existingUser.username })
+    token = loginResponse.body.token
+
+    for (let blog of helper.initialBlogs) {
+      let blogObject = new Blog(blog)
+      await blogObject.save()
+    }
+
+  })
+  test('succeeds with valid data', async () => {
 
     const newBlog = {
       title: 'Test Blog Post',
@@ -72,9 +77,6 @@ describe('creating a new blog post', () => {
       likes: 10,
       user: user._id
     }
-
-  
-    const token = loginResponse.body.token
 
     const response = await api
       .post('/api/blogs')
