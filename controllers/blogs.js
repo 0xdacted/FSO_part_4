@@ -76,7 +76,7 @@ blogsRouter.put('/:id', async (request, response) => {
     if (!blog) {
       return response.status(404).json({ error: 'Blog not found' })
     }
-    if (request.user.toString() !== request.user._id.toString()) {
+    if (decodedToken.id.toString() !== blog.user._id.toString()) {
       return response.status(401).json({ error: 'unauthorized' })
     }
     response.json(blog)

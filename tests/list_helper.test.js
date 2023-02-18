@@ -252,7 +252,6 @@ describe('delete blog post routing',  () => {
     user = await User.findOne({ username: existingUser.username })
 
     token = loginResponse.body.token
-    console.log(user, token)
   })
 
   test('deletes a single blog post', async () => {
@@ -282,18 +281,41 @@ describe('delete blog post routing',  () => {
 })
 
 describe('update blog post routing', () => {
+  let user, token
+
+  beforeEach(async () => {
+    const existingUser = {
+      username: 'testuser',
+      password: 'password123',
+      name: 'Test User',
+    }
+    await api.post('/api/users').send(existingUser)
+
+    const loginResponse = await api
+      .post('/api/login')
+      .send({
+        username: existingUser.username,
+        password: existingUser.password
+      })
+
+    user = await User.findOne({ username: existingUser.username })
+
+    token = loginResponse.body.token
+  })
   test('updates the number of likes for a blog post', async () => {
     const newBlog = new Blog({
       title: 'Test Blog',
       author: 'Test Author',
       url: 'http://test.com',
       likes: 5,
+      user: user._id,
     })
     await newBlog.save()
 
     const updatedBlog = { likes: 10 }
     const response = await api
       .put(`/api/blogs/${newBlog.id}`)
+      .set('Authorization', `Bearer ${token}`)
       .send(updatedBlog)
       .expect(200)
 
@@ -306,6 +328,7 @@ describe('update blog post routing', () => {
 
     await api
       .put(`/api/blogs/${invalidId}`)
+      .set('Authorization', `Bearer ${token}`)
       .send(updatedBlog)
       .expect(404)
   })
