@@ -22,6 +22,9 @@ blogsRouter.post('/', async (request, response) => {
     if (!body.title || !body.url) {
       return response.status(400).json({ error: 'Title and url are required' })
     }
+    if (!request.token) {
+      return response.status(401).json({ error: 'token is invalid' })
+    }
     const user = request.user
     const blog = new Blog({
       title: body.title,

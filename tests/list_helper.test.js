@@ -83,7 +83,6 @@ describe('creating a new blog post', () => {
       .expect(201)
       .expect('Content-Type', /application\/json/)
 
-
     const savedBlog = await Blog.findById(response.body.id)
     expect(savedBlog).toMatchObject(newBlog)
 
@@ -95,7 +94,8 @@ describe('creating a new blog post', () => {
     const newBlog = {
       title: 'Test blog',
       author: 'Test author',
-      url: 'http://www.testblog.com'
+      url: 'http://www.testblog.com',
+      user: user._id
     }
 
     const response = await api
@@ -111,10 +111,12 @@ describe('creating a new blog post', () => {
     const newBlog = {
       author: 'Test Author',
       url: 'http://testblog.com',
-      likes: 0
+      likes: 0,
+      user: user._id
     }
     await api
       .post('/api/blogs')
+      .set('Authorization', `Bearer ${token}`)
       .send(newBlog)
       .expect(400)
   })
@@ -122,10 +124,12 @@ describe('creating a new blog post', () => {
     const newBlog = {
       title: 'Test Blog',
       author: 'Test Author',
-      likes: 0
+      likes: 0,
+      user: user._id
     }
     await api
       .post('/api/blogs')
+      .set('Authorization', `Bearer ${token}`)
       .send(newBlog)
       .expect(400)
   })
