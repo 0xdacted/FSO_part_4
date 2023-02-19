@@ -5,6 +5,8 @@ const api = supertest(app)
 const Blog = require('../models/blog')
 const mongoose = require('mongoose')
 const User = require('../models/user')
+const { loginAndFetchUser } = require('./testData')
+
 
 describe('database return values', () => {
   beforeEach(async () => {
@@ -47,18 +49,10 @@ describe('creating a new blog post', () => {
       password: 'password123',
       name: 'Test User',
     }
-    await api.post('/api/users').send(existingUser)
+    const { user: loggedInUser, token: authToken } = await loginAndFetchUser(api, existingUser)
 
-    const loginResponse = await api
-      .post('/api/login')
-      .send({
-        username: existingUser.username,
-        password: existingUser.password
-      })
-
-    user = await User.findOne({ username: existingUser.username })
-
-    token = loginResponse.body.token
+    user = loggedInUser
+    token = authToken
 
     for (let blog of helper.initialBlogs) {
       let blogObject = new Blog(blog)
