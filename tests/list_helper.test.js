@@ -252,18 +252,10 @@ describe('delete blog post routing',  () => {
       password: 'password123',
       name: 'Test User',
     }
-    await api.post('/api/users').send(existingUser)
+    const { user: loggedInUser, token: authToken } = await loginAndFetchUser(api, existingUser)
 
-    const loginResponse = await api
-      .post('/api/login')
-      .send({
-        username: existingUser.username,
-        password: existingUser.password
-      })
-
-    user = await User.findOne({ username: existingUser.username })
-
-    token = loginResponse.body.token
+    user = loggedInUser
+    token = authToken
   })
 
   test('deletes a single blog post', async () => {
@@ -301,18 +293,10 @@ describe('update blog post routing', () => {
       password: 'password123',
       name: 'Test User',
     }
-    await api.post('/api/users').send(existingUser)
+    const { user: loggedInUser, token: authToken } = await loginAndFetchUser(api, existingUser)
 
-    const loginResponse = await api
-      .post('/api/login')
-      .send({
-        username: existingUser.username,
-        password: existingUser.password
-      })
-
-    user = await User.findOne({ username: existingUser.username })
-
-    token = loginResponse.body.token
+    user = loggedInUser
+    token = authToken
   })
   test('updates the number of likes for a blog post', async () => {
     const newBlog = new Blog({
