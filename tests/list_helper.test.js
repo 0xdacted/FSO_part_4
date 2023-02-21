@@ -330,8 +330,6 @@ describe('update blog post routing', () => {
   })
 })
 
-
-
 afterAll(async () => {
   await mongoose.connection.close
 })
